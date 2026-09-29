@@ -84,3 +84,5 @@ The compiler suite builds the sibling `../html-ui-cli` producer and converts all
 Generated v2 SFCs can feed `html-ui-shadcn --framework vue --plugin shadcn-ui`. Safe simple attributes and disabled/required properties use declarative bindings. Native model/default-value/reset synchronization remains explicit; components without form controls omit form-reset subscriptions. The downstream library writer can separate recipe and contract metadata companions for editable application source.
 
 Text-value directives skip writes when the native control already holds the model value. This preserves browser user-edit validation (such as minlength), selection and native editing while keeping external prop changes synchronized. Native table sections include thead, tbody and tfoot.
+
+Optional incoming model props retain their optional initialization, while update events use the native DOM read type. A range value update is always numeric, so a Slider can bind to `ref(50)` without adding undefined to the application model.

@@ -31,3 +31,27 @@ func TestStateBacksScopedSlots(t *testing.T) {
 		t.Fatal(r.Source)
 	}
 }
+
+func TestOptionalNativeModelEmitsOnlyNativeReadType(t *testing.T) {
+	c := parsed(t, testinput.Checkbox)
+	for i := range c.Props {
+		if c.Props[i].Name == "checked" {
+			c.Props[i].Optional = true
+			c.Props[i].Default = nil
+		}
+	}
+	for i := range c.Nodes {
+		for j := range c.Nodes[i].Bindings {
+			if c.Nodes[i].Bindings[j].Prop == "checked" {
+				c.Nodes[i].Bindings[j].Guarded = true
+			}
+		}
+	}
+	source := generated(t, c).Source
+	if !strings.Contains(source, `_htmlUiRef<boolean | undefined>`) {
+		t.Fatal("optional incoming prop needs optional local initialization")
+	}
+	if !strings.Contains(source, `"update:checked": [value: boolean]`) {
+		t.Fatal("native checked reads always emit boolean, even when incoming prop is omitted")
+	}
+}

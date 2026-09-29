@@ -8,15 +8,15 @@ import (
 
 type stateRead struct{ Target, DOMType, Property string }
 type stateField struct {
-	Prop, Type string
-	Default    json.RawMessage
-	Reads      []stateRead
+	Prop, Type, NativeType string
+	Default                json.RawMessage
+	Reads                  []stateRead
 }
 
 func inferState(c *contract.Component) []stateField {
 	fields := []stateField{}
 	for _, prop := range c.Props {
-		field := stateField{Prop: prop.Name, Type: prop.Type, Default: prop.Default}
+		field := stateField{Prop: prop.Name, Type: prop.Type, NativeType: prop.Type, Default: prop.Default}
 		if prop.Optional && prop.Default == nil {
 			field.Type += " | undefined"
 		}

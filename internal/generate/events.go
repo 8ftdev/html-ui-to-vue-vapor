@@ -12,7 +12,7 @@ func (r *renderer) writeEmits() {
 		p("  %s: [event: %s]\n", js(event.Name), event.Type)
 	}
 	for _, field := range r.fields {
-		p("  %s: [value: %s]\n", js("update:"+field.Prop), field.Type)
+		p("  %s: [value: %s]\n", js("update:"+field.Prop), field.NativeType)
 	}
 	p("}>()\n")
 }
