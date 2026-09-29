@@ -19,3 +19,16 @@ func TestDeclarativeAttributeAvoidsWatchEffect(t *testing.T) {
 		t.Fatal("missing declarative id")
 	}
 }
+
+func TestOmittedProgressValueRemainsIndeterminate(t *testing.T) {
+	c := parsed(t, testinput.Static)
+	c.Nodes[0].Tag = "progress"
+	c.Nodes[0].DOMType = "HTMLProgressElement"
+	c.RootType = "HTMLProgressElement"
+	c.Props = append(c.Props, contract.Prop{Field: contract.Field{Name: "value", Type: "number", Optional: true}})
+	c.Nodes[0].Bindings = append(c.Nodes[0].Bindings, contract.Binding{Kind: "property", Name: "value", Prop: "value", Guarded: true})
+	output := generated(t, c).Source
+	if !strings.Contains(output, `if (value === undefined) node.removeAttribute("value")`) {
+		t.Fatal("omitted progress value must remove its value attribute")
+	}
+}

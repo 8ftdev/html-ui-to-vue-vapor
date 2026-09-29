@@ -61,7 +61,9 @@ func (r *renderer) writeNativeBindings() {
 					p("      Reflect.set(node, 'value', %s ?? '')\n", r.scriptExpression(b.Prop))
 				}
 			} else {
-				if b.Name == "value" {
+				if b.Name == "value" && node.Tag == "progress" {
+					p("      if (value === undefined) node.removeAttribute(\"value\")\n      else Reflect.set(node, \"value\", value)\n")
+				} else if b.Name == "value" {
 					p("      Reflect.set(node, %s, value ?? '')\n", js(b.Name))
 				} else {
 					p("      if (value !== undefined) Reflect.set(node, %s, value)\n", js(b.Name))

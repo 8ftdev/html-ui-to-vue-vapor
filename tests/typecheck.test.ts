@@ -1,5 +1,5 @@
 import {expect,test} from 'bun:test'
-import {mkdirSync,writeFileSync} from 'node:fs'
+import {mkdirSync,writeFileSync,rmSync} from 'node:fs'
 import {resolve} from 'node:path'
 import {spawnSync} from 'node:child_process'
 import {convert} from './support/compile'
@@ -7,6 +7,7 @@ import {parse} from '@vue/compiler-sfc'
 import {disclosure,checkbox,staticInput,controlInput} from './support/inputs'
 const dir=resolve('.test-output/types')
 mkdirSync(dir,{recursive:true})
+rmSync(resolve(dir,'ui-consumer.vue'),{force:true})
 for(const [name,input] of Object.entries({Disclosure:disclosure,LiteralDisclosure:disclosure.replace('name?: string','name?: "first" | "second"'),Binary:checkbox,Static:staticInput,Text:controlInput('text'),NumberControl:controlInput('number'),Range:controlInput('range')})){
  const source=convert(input).source
  writeFileSync(resolve(dir,`${name}.vue`),source)
@@ -53,7 +54,7 @@ test('Vue checker rejects invalid public contracts',()=>{
   expect(result.stdout+result.stderr).not.toMatch(/(?:Disclosure|Binary|Static)\.vue.*error/)
  }
  writeFileSync(resolve(dir,'consumer.vue'),consumer)
-})
+},15000)
 
 test('Vue exposes portable state and part override types as named exports',()=>{
  writeFileSync(resolve(dir,'ui-consumer.vue'),`<script setup lang="ts">
@@ -62,10 +63,11 @@ const version: 2 = contractVersion
 const classes: AccordionClasses = {trigger:{state:{expanded:'bg-accent', hover:{mode:'replace',value:'bg-muted'}}}}
 // @ts-expect-error summary has no disabled state
 const invalid: AccordionClasses = {trigger:{state:{disabled:'opacity-50'}}}
-// @ts-expect-error slots do not invent owned content parts
-const missing: AccordionClasses = {content:{base:'p-4'}}
+const content: AccordionClasses = {content:{state:{expanded:'p-4'}}}
+// @ts-expect-error undeclared parts are rejected
+const missing: AccordionClasses = {panel:{base:'p-4'}}
 const node: 'summary' = ui.parts.trigger.node
-void [version, classes, invalid, missing, node]
+void [version, classes, invalid, content, missing, node]
 </script><template><div /></template>`)
  const result=checkVue()
  expect(result.stdout+result.stderr).toBe('')

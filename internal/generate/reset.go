@@ -31,7 +31,7 @@ func (r *renderer) writeReset() {
 		p("_htmlUiOnMounted(_htmlUiReadNativeState)\n_htmlUiOnUpdated(_htmlUiReadNativeState)\n_htmlUiOnBeforeUnmount(() => { _htmlUiDisposed = true })\n")
 		return
 	}
-	p("function _htmlUiOnReset(event: Event) {\n  queueMicrotask(() => {\n    if (_htmlUiDisposed || event.defaultPrevented) return\n    _htmlUiReadNativeState()\n  })\n}\n")
+	p("function _htmlUiOnReset(event: Event) {\n  setTimeout(() => {\n    if (_htmlUiDisposed || event.defaultPrevented) return\n    _htmlUiReadNativeState()\n  })\n}\n")
 	p("function _htmlUiDetachResetListeners() {\n  for (const form of _htmlUiForms) form.removeEventListener('reset', _htmlUiOnReset)\n  _htmlUiForms.clear()\n}\n")
 	p("function _htmlUiSyncForms() {\n  const next = new Set<HTMLFormElement>()\n")
 	for i, node := range r.c.Nodes {
