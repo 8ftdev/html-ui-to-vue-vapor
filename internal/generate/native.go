@@ -58,11 +58,13 @@ func (r *renderer) writeNativeBindings() {
 			if b.Kind == "attribute" {
 				p("      if (value === undefined) node.removeAttribute(%s)\n      else node.setAttribute(%s, String(value))\n", js(b.Name), js(b.Name))
 				if b.Name == "value" && r.stateIndex(b.Prop) >= 0 {
-					p("      Reflect.set(node, 'value', %s ?? '')\n", r.scriptExpression(b.Prop))
+					p("      const next = %s ?? ''\n      if (Reflect.get(node, \"value\") !== String(next)) Reflect.set(node, \"value\", next)\n", r.scriptExpression(b.Prop))
 				}
 			} else {
 				if b.Name == "value" && node.Tag == "progress" {
 					p("      if (value === undefined) node.removeAttribute(\"value\")\n      else Reflect.set(node, \"value\", value)\n")
+				} else if b.Name == "value" && (node.Tag == "input" || node.Tag == "textarea" || node.Tag == "select") {
+					p("      const next = value ?? ''\n      if (Reflect.get(node, \"value\") !== String(next)) Reflect.set(node, \"value\", next)\n")
 				} else if b.Name == "value" {
 					p("      Reflect.set(node, %s, value ?? '')\n", js(b.Name))
 				} else {

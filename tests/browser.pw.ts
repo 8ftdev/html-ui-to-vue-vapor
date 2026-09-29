@@ -115,3 +115,13 @@ test('absent optional bindings do not serialize undefined',async({page})=>{
  await expect(page.locator('input')).not.toHaveAttribute('min')
  await expect(page.locator('input')).not.toHaveAttribute('form')
 })
+
+test('native text edits preserve user minlength validation after model synchronization',async({page})=>{
+ await openCase(page,'text')
+ const input=page.locator('input')
+ await input.evaluate((el:HTMLInputElement)=>{el.minLength=2})
+ await input.fill('')
+ await input.pressSequentially('x')
+ await expect(input).toHaveValue('x')
+ await expect.poll(()=>input.evaluate((el:HTMLInputElement)=>el.validity.tooShort)).toBe(true)
+});

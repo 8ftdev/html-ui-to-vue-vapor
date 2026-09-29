@@ -32,3 +32,20 @@ func TestOmittedProgressValueRemainsIndeterminate(t *testing.T) {
 		t.Fatal("omitted progress value must remove its value attribute")
 	}
 }
+
+func TestStringControlAvoidsRedundantValueWrites(t *testing.T) {
+	for _, tag := range []string{"input", "textarea", "select"} {
+		t.Run(tag, func(t *testing.T) {
+			c := parsed(t, testinput.Static)
+			c.Nodes[0].Tag = tag
+			c.Nodes[0].DOMType = contract.DOMType(tag)
+			c.RootType = c.Nodes[0].DOMType
+			c.Props = append(c.Props, contract.Prop{Field: contract.Field{Name: "value", Type: "string", Optional: true}})
+			c.Nodes[0].Bindings = append(c.Nodes[0].Bindings, contract.Binding{Kind: "property", Name: "value", Prop: "value", Guarded: true})
+			output := generated(t, c).Source
+			if !strings.Contains(output, `if (Reflect.get(node, "value") !== String(next)) Reflect.set(node, "value", next)`) {
+				t.Fatal("string-valued control must preserve native user edits by skipping identical writes")
+			}
+		})
+	}
+}
