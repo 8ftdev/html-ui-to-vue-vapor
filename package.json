@@ -1,0 +1,23 @@
+{
+  "name": "html-ui-to-vue-vapor-checks",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:compiler": "bun test tests/compiler.test.ts",
+    "test:types": "bun test tests/typecheck.test.ts",
+    "test:browser": "playwright test",
+    "test": "bun run test:compiler && bun run test:types && bun run test:browser"
+  },
+  "devDependencies": {
+    "vue": "3.6.0-rc.9",
+    "@vue/compiler-sfc": "3.6.0-rc.9",
+    "typescript": "7.0.2",
+    "vue-tsc": "3.3.11",
+    "@playwright/test": "1.63.0",
+    "@typescript/typescript6": "6.0.2"
+  },
+  "overrides": {
+    "@vue/compiler-dom": "3.6.0-rc.9",
+    "@vue/shared": "3.6.0-rc.9"
+  }
+}
