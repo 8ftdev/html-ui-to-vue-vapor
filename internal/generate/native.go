@@ -45,7 +45,7 @@ func (r *renderer) writeNativeBindings() {
 		if !r.imperative(node) {
 			continue
 		}
-		p("const vHtmlUiBind%d = (node: Element) => {\n  _htmlUiWatchEffect(() => {\n", i)
+		p("const vHtmlUiBind%d = (node: Element) => {\n", i)
 		for j, b := range node.Bindings {
 			if r.declarative(b) {
 				continue
@@ -54,7 +54,9 @@ func (r *renderer) writeNativeBindings() {
 			if b.Name == "defaultValue" || b.Name == "defaultChecked" || b.Kind == "attribute" && b.Name == "value" && r.stateIndex(b.Prop) >= 0 {
 				expr = fmt.Sprintf("_htmlUiBaseline%d_%d", i, j)
 			}
-			p("    {\n      const value = %s\n", expr)
+			// Each binding tracks only its own dependencies. A native checked
+			// change must not restore an unchanged indeterminate prop after a click.
+			p("  _htmlUiWatchEffect(() => {\n      const value = %s\n", expr)
 			if b.Kind == "attribute" {
 				p("      if (value === undefined) node.removeAttribute(%s)\n      else node.setAttribute(%s, String(value))\n", js(b.Name), js(b.Name))
 				if b.Name == "value" && r.stateIndex(b.Prop) >= 0 {
@@ -63,6 +65,8 @@ func (r *renderer) writeNativeBindings() {
 			} else {
 				if b.Name == "value" && node.Tag == "progress" {
 					p("      if (value === undefined) node.removeAttribute(\"value\")\n      else Reflect.set(node, \"value\", value)\n")
+				} else if b.Name == "value" && node.Tag == "select" {
+					p("      if (value !== undefined && Reflect.get(node, \"value\") !== String(value)) Reflect.set(node, \"value\", value)\n")
 				} else if b.Name == "value" && (node.Tag == "input" || node.Tag == "textarea" || node.Tag == "select") {
 					p("      const next = value ?? ''\n      if (Reflect.get(node, \"value\") !== String(next)) Reflect.set(node, \"value\", next)\n")
 				} else if b.Name == "value" {
@@ -71,14 +75,14 @@ func (r *renderer) writeNativeBindings() {
 					p("      if (value !== undefined) Reflect.set(node, %s, value)\n", js(b.Name))
 				}
 			}
-			p("    }\n")
-		}
-		if len(r.fields) > 0 {
-			if r.hasFormControls() {
-				p("    _htmlUiSyncForms()\n")
+			if len(r.fields) > 0 {
+				if r.hasFormControls() {
+					p("    _htmlUiSyncForms()\n")
+				}
+				p("    _htmlUiScheduleNativeRead()\n")
 			}
-			p("    _htmlUiScheduleNativeRead()\n")
+			p("  })\n")
 		}
-		p("  })\n}\n")
+		p("}\n")
 	}
 }
