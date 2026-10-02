@@ -11,7 +11,13 @@ func (r *renderer) writeNode(id string, depth int) {
 	indent := strings.Repeat("  ", depth)
 	fmt.Fprintf(&r.template, "%s<%s", indent, node.Tag)
 	for _, attr := range node.Attributes {
-		fmt.Fprintf(&r.template, " %s=\"%s\"", attr.Name, escaped(attr.Value))
+		if staticBooleanAttribute(attr.Name) {
+			// HTML boolean attributes are true whenever present, including value="false".
+			// A boolean binding also satisfies Vue's Booleanish attribute types.
+			fmt.Fprintf(&r.template, " :%s=\"true\"", attr.Name)
+		} else {
+			fmt.Fprintf(&r.template, " %s=\"%s\"", attr.Name, escaped(attr.Value))
+		}
 	}
 	for i, n := range r.c.Nodes {
 		if n.ID == id && r.imperative(n) {
@@ -50,6 +56,15 @@ func (r *renderer) writeNode(id string, depth int) {
 		}
 	}
 	fmt.Fprintf(&r.template, "%s</%s>\n", indent, node.Tag)
+}
+
+func staticBooleanAttribute(name string) bool {
+	switch strings.ToLower(name) {
+	case "allowfullscreen", "async", "autofocus", "autoplay", "checked", "controls", "default", "defer", "disabled", "formnovalidate", "inert", "ismap", "itemscope", "loop", "multiple", "muted", "nomodule", "novalidate", "open", "playsinline", "readonly", "required", "reversed", "selected":
+		return true
+	default:
+		return false
+	}
 }
 func (r *renderer) writeSlot(child contract.Child, depth int) {
 	fmt.Fprintf(&r.template, "%s<slot name=\"%s\"", strings.Repeat("  ", depth), escaped(child.Slot))

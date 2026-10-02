@@ -59,3 +59,19 @@ func TestGenerateVoidElements(t *testing.T) {
 		t.Fatal(r.Source)
 	}
 }
+
+func TestGenerateStaticBooleanAttributes(t *testing.T) {
+	c := parsed(t, testinput.Checkbox)
+	c.Nodes[0].Attributes = append(c.Nodes[0].Attributes,
+		contract.Attribute{Name: "autofocus", Value: ""},
+		contract.Attribute{Name: "inert", Value: "false"},
+		contract.Attribute{Name: "aria-disabled", Value: "false"},
+		contract.Attribute{Name: "hidden", Value: "until-found"},
+	)
+	source := generated(t, c).Source
+	for _, fragment := range []string{`:autofocus="true"`, `:inert="true"`, `aria-disabled="false"`, `hidden="until-found"`} {
+		if !strings.Contains(source, fragment) {
+			t.Fatalf("missing %s:\n%s", fragment, source)
+		}
+	}
+}
