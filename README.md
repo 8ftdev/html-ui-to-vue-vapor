@@ -81,7 +81,7 @@ The compiler suite builds the sibling `../html-ui-cli` producer and converts all
 
 ### UI plugin integration
 
-Generated v2 SFCs can feed `html-ui-shadcn --framework vue --plugin shadcn-ui`. Safe simple attributes and disabled/required properties use declarative bindings. Native model/default-value/reset synchronization remains explicit; components without form controls omit form-reset subscriptions. The downstream library writer can separate recipe and contract metadata companions for editable application source.
+Generated v2 SFCs can feed `html-ui-design --framework vue --plugin shadcn-ui`. Safe simple attributes and disabled/required properties use declarative bindings. Native model/default-value/reset synchronization remains explicit; components without form controls omit form-reset subscriptions. The downstream library writer can separate recipe and contract metadata companions for editable application source.
 
 Text-value directives skip writes when the native control already holds the model value. This preserves browser user-edit validation (such as minlength), selection and native editing while keeping external prop changes synchronized. Native table sections include thead, tbody and tfoot.
 
